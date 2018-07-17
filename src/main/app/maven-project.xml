@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mule
+	xmlns:metadata="http://www.mulesoft.org/schema/mule/metadata"
 	xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xmlns:db="http://www.mulesoft.org/schema/mule/db"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http"
@@ -38,7 +39,7 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 		brokerURL="vm://localhost"
 		validateConnections="true"
 		doc:name="Active MQ" />
-	<flow name="mavenFlow">
+	<flow name="retrieveFlights">
 		<http:listener
 			config-ref="HTTP_Listener_Configuration"
 			path="/hello"
@@ -49,12 +50,17 @@ http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/jso
 			<db:parameterized-query><![CDATA[select * from flights]]></db:parameterized-query>
 		</db:select>
 		<json:object-to-json-transformer doc:name="Object to JSON" />
+		<set-property
+			propertyName="Content-Type"
+			value="application/json"
+			doc:name="Property" />
 		<jms:outbound-endpoint
 			queue="flights"
 			connector-ref="Active_MQ"
-			doc:name="JMS" />
+			doc:name="JMS"
+			metadata:id="fd2bbc4c-9c8b-444c-a6f0-46a4dad2c4a8" />
 	</flow>
-	<flow name="maven-projectFlow">
+	<flow name="logFlights">
 		<jms:inbound-endpoint
 			queue="flights"
 			connector-ref="Active_MQ"
